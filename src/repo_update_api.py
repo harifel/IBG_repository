@@ -11,14 +11,22 @@ from pathlib import Path
 import numpy as np
 import re
 
-TOKEN = os.getenv("TUGRAZ_REPO_TOKEN")
+base_dir = Path(__file__).resolve().parent.parent
+config_path = base_dir / "data" / "config.json"
+config = {}
+if config_path.is_file():
+    with config_path.open("r", encoding="utf8") as f:
+        config = json.load(f)
+
+TOKEN = config.get("token") or os.getenv("TUGRAZ_REPO_TOKEN")
 if not TOKEN:
     raise RuntimeError(
-        "Environment variable TUGRAZ_REPO_TOKEN is not set. "
-        "Request access via h.felic@tugraz.at or repository-support@tugraz.at."
+        "No API token configured. Set it in data/config.json (token) or via the "
+        "TUGRAZ_REPO_TOKEN environment variable. If you need access, contact "
+        "h.felic@tugraz.at or repository-support@tugraz.at."
     )
 
-DOMAIN = os.getenv("TUGRAZ_REPO_DOMAIN", "https://repository.tugraz.at")
+DOMAIN = config.get("domain") or os.getenv("TUGRAZ_REPO_DOMAIN", "https://repository.tugraz.at")
 DATA_MODEL = "marc21"
 data = "Liste_DOI_template"
 
@@ -151,8 +159,7 @@ if __name__ == "__main__":
     data_df = pd.read_excel(data_dir / f"{data}_DOI.xlsx")
 
     # Call the function, specifying the directory containing the JSON files
+    update_json_record(directory=data_dir, data_df=data_df)
 
-    update_json_record(directory="", data_df=data_df)
-
-    for json_file in Path("").glob("Paper_*.json"):
-        draft(TOKEN, DOMAIN, DATA_MODEL, input_json=json_file, input_metadata=None, directory="")
+    for json_file in data_dir.glob("Paper_*.json"):
+        draft(TOKEN, DOMAIN, DATA_MODEL, input_json=str(json_file), input_metadata=None, directory="")

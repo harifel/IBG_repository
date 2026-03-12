@@ -1,0 +1,82 @@
+{
+  "access": {
+    "record": "public",
+    "files": "public",
+    "embargo": {
+      "active": false,
+      "reason": null
+    },
+    "status": "metadata-only"
+  },
+  "metadata": {
+    "fields": [
+      {
+        "id": "008",
+        "ind1": "",
+        "ind2": "",
+        "subfield": "#######2026#############################"
+      },
+      {
+        "id": "041",
+        "ind1": "_",
+        "ind2": "_",
+        "subfield": "$$a de"
+      },
+      {
+        "id": "100",
+        "ind1": "1",
+        "ind2": "",
+        "subfield": "$$a Name 1, Name 1 $$u Company 2"
+      },
+      {
+        "id": "245",
+        "ind1": "1",
+        "ind2": "0",
+        "subfield": "$$a Muster 2"
+      },
+      {
+        "id": "264",
+        "ind1": " ",
+        "ind2": "",
+        "subfield": "$$b 40. Christian Veder Kolloquium, Technische Universität Graz, Institut für Bodenmechanik, Grundbau und Numerische Geotechnik $$c 2026"
+      },
+      {
+        "id": "300",
+        "ind1": "_",
+        "ind2": "_",
+        "subfield": "$$a Technische Universität Graz, Institut für Bodenmechanik, Grundbau und Numerische Geotechnik $$b April 2026"
+      },
+      {
+        "id": "500",
+        "ind1": " ",
+        "ind2": " ",
+        "subfield": "$$a 40. Christian Veder Kolloquium, Konferenzbeitrag_2"
+      },
+      {
+        "id": "540",
+        "ind1": " ",
+        "ind2": " ",
+        "subfield": "$$a Creative Commons namensnennung $$f CC By 4.0 DEED Lizenz $$u https://creativecommons.org/license/by/4.0 $$2 cc"
+      },
+      {
+        "id": "970",
+        "ind1": "2",
+        "ind2": "",
+        "subfield": "$$b 2026 $$c Technische Universität Graz $$d Konferenzbeitrag"
+      },
+      {
+        "id": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfield": "$$a Name 2, Name 2 $$u Company 2"
+      },
+      {
+        "id": "700",
+        "ind1": "1",
+        "ind2": " ",
+        "subfield": "$$a Name 3, Name 3 $$u Company 2"
+      }
+    ],
+    "leader": "00000nam a2200000zca4500"
+  }
+}

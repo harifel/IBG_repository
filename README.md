@@ -10,9 +10,11 @@ The scripts support both the TU Graz **test** instance (`https://invenio-test.tu
 ```
 IBG_repository
 ├── data/                  # Excel input / output files (not tracked here)
+├── pdf/                   # PDF full texts to be uploaded
 ├── src/
 │   ├── repo_create_api.py # Create MARC21 drafts from Excel data
-│   └── repo_update_api.py # Update JSON files with DOIs and upload
+│   ├── repo_update_api.py # Update JSON with DOIs and upload metadata
+│   └── repo_upload_files.py # Upload corresponding PDF files
 ├── environment.txt        # Python dependencies
 ├── LICENSE
 └── README.md
@@ -45,6 +47,7 @@ IBG_repository
 - Place the required Excel files (e.g. `Liste_DOI_template.xlsx`) in the `data` folder.
 - Run `repo_create_api.py` to generate JSON records and create drafts in the selected repository instance.
 - Run `repo_update_api.py` to enrich JSON records with DOIs and upload them.
+- Place the PDF files in the `pdf` folder, add their filenames to the `pdf_filename` column in `Liste_DOI_template_DOI.xlsx`, and run `repo_upload_files.py` to upload the PDFs to the corresponding drafts.
 
 ## What you may need to adapt
 
@@ -52,7 +55,7 @@ For users who are not familiar with the code, the following points are the most 
 
 - **Excel filenames and location**
   - Ensure your input file for creating records is named like `Liste_DOI_template.xlsx` and placed in the `data` folder (same level as `src`).
-  - After running `repo_create_api.py`, a file `Liste_DOI_template_DOI.xlsx` will be written to the same `data` folder and can then be used by `repo_update_api.py`.
+  - After running `repo_create_api.py`, a file `Liste_DOI_template_DOI.xlsx` will be written to the same `data` folder and can then be used by `repo_update_api.py` and `repo_upload_files.py`.
   - If your filenames differ, update the `data` variable and/or the explicit filename in:
     - `repo_create_api.py` (variable `data` near the top and the `pd.read_excel(...)` call in the `__main__` block).
     - `repo_update_api.py` (the `pd.read_excel(...)` call in the `__main__` block).
@@ -60,6 +63,7 @@ For users who are not familiar with the code, the following points are the most 
 - **Excel column structure**
   - `repo_create_api.py` expects, at minimum, the columns: `id`, `title`, `lang`, `given_name`, `family_name`, `identifier`, `affiliation`.
   - `repo_update_api.py` expects a column `id` and a column `DOI_suf` (the DOI suffix) for each record.
+  - `repo_upload_files.py` expects at least the columns `DOI_suf` and `pdf_filename` in `Liste_DOI_template_DOI.xlsx`, where `pdf_filename` is the name of the corresponding PDF file in the `pdf` folder.
   - If your column names are different, either rename the columns in Excel or adjust the corresponding column names in the code where `groupby` and `data_df[...]` are used.
 
 - **Metadata constants**

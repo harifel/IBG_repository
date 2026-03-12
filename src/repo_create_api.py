@@ -17,19 +17,24 @@ import numpy as np
 
 import re
 
-# Configuration via environment variables (no tokens in source control)
-# Set TUGRAZ_REPO_TOKEN to the API token you receive from the repository team.
-# Use TUGRAZ_REPO_DOMAIN to switch between the test and production systems, e.g.:
-#   https://invenio-test.tugraz.at  (testing)
-#   https://repository.tugraz.at    (production)
-TOKEN = os.getenv("TUGRAZ_REPO_TOKEN")
+
+base_dir = Path(__file__).resolve().parent.parent
+config_path = base_dir / "data" / "config.json"
+config = {}
+if config_path.is_file():
+    with config_path.open("r", encoding="utf8") as f:
+        config = json.load(f)
+
+# Prefer local config.json, fall back to environment variables
+TOKEN = config.get("token") or os.getenv("TUGRAZ_REPO_TOKEN")
 if not TOKEN:
     raise RuntimeError(
-        "Environment variable TUGRAZ_REPO_TOKEN is not set. "
-        "Request access via h.felic@tugraz.at or repository-support@tugraz.at."
+        "No API token configured. Set it in data/config.json (token) or via the "
+        "TUGRAZ_REPO_TOKEN environment variable. If you need access, contact "
+        "h.felic@tugraz.at or repository-support@tugraz.at."
     )
 
-DOMAIN = os.getenv("TUGRAZ_REPO_DOMAIN", "https://repository.tugraz.at")
+DOMAIN = config.get("domain") or os.getenv("TUGRAZ_REPO_DOMAIN", "https://repository.tugraz.at")
 DATA_MODEL = "marc21"
 data = "Liste_DOI_template"
 
@@ -148,8 +153,12 @@ def create_json_record(title, authors, publisher, publication_date, lang, long_c
         })
 
 
-    # Save the JSON file with the sanitized title
-    with open(f"Paper_{index}_{safe_title}.json", 'w', encoding='utf-8') as f:
+    # Save the JSON file with the sanitized title inside the data directory
+    base_dir = Path(__file__).resolve().parent.parent
+    data_dir = base_dir / "data"
+    data_dir.mkdir(exist_ok=True)
+    json_path = data_dir / f"Paper_{index}_{safe_title}.json"
+    with json_path.open('w', encoding='utf-8') as f:
         json.dump(record, f, indent=2, ensure_ascii=False)
 
     print(f"Record saved for title: {title}")
@@ -228,7 +237,8 @@ if __name__ == "__main__":
         )
         safe_title = re.sub(r'[<>:"/\\|?*]', '_', title)  # Replacing special characters with '_'
         # Get the DOI for the current record
-        doi = draft(TOKEN, DOMAIN, DATA_MODEL, input_json=f"Paper_{record_id}_{safe_title}.json", input_metadata=None, directory="")
+        json_input_path = data_dir / f"Paper_{record_id}_{safe_title}.json"
+        doi = draft(TOKEN, DOMAIN, DATA_MODEL, input_json=str(json_input_path), input_metadata=None, directory="")
 
         # Assign DOI for each author in the current record
         if doi == None:
