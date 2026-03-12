@@ -72,8 +72,7 @@ For users who are not familiar with the code, the following points are the most 
   - can all be changed in `repo_create_api.py` in the call to `create_json_record(...)` at the bottom of the file.
 
 - **Language and access settings**
-  - The language code (`lang = 'de'`) and MARC21 fields (e.g. `041`, `540`, `856`) are currently set for a specific German-language use case.
-  - If you need different languages or access settings, adjust the values in the `create_json_record(...)` function in `repo_create_api.py` and in the added `024`/`856` fields in `repo_update_api.py`.
+  - The example configuration uses the language code `lang = 'de'` in `repo_create_api.py`, but the same workflow also works for English (set `lang = 'en'` and use English metadata text).
 
 - **Repository domain (test vs production)**
   - Set the desired domain in `data/config.json` (e.g. `https://invenio-test.tugraz.at` for testing, or `https://repository.tugraz.at` for production).
