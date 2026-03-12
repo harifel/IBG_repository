@@ -11,11 +11,6 @@ from pathlib import Path
 import numpy as np
 import re
 
-# Configuration via environment variables (no tokens in source control)
-# Set TUGRAZ_REPO_TOKEN to the API token you receive from the repository team.
-# Use TUGRAZ_REPO_DOMAIN to switch between the test and production systems, e.g.:
-#   https://invenio-test.tugraz.at  (testing)
-#   https://repository.tugraz.at    (production)
 TOKEN = os.getenv("TUGRAZ_REPO_TOKEN")
 if not TOKEN:
     raise RuntimeError(
@@ -153,7 +148,7 @@ if __name__ == "__main__":
     data_dir = base_dir / "data"
 
     # Load data from the Excel file in the data directory
-    data_df = pd.read_excel(data_dir / "Liste_DOI_Fel_DOI.xlsx")
+    data_df = pd.read_excel(data_dir / f"{data}_DOI.xlsx")
 
     # Call the function, specifying the directory containing the JSON files
 

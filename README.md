@@ -33,21 +33,16 @@ IBG_repository
 
 ## Configuration (domains and token)
 
-- **Token**: set the environment variable `TUGRAZ_REPO_TOKEN` to the API token you received from the repository team.  
-- **Domain**:
-  - For testing: set `TUGRAZ_REPO_DOMAIN` to `https://invenio-test.tugraz.at`.
-  - For production: set `TUGRAZ_REPO_DOMAIN` to `https://repository.tugraz.at` (default if the variable is not set).
-
-On Windows PowerShell you can set them like:
-
-```powershell
-$env:TUGRAZ_REPO_TOKEN = "YOUR_TOKEN_HERE"
-$env:TUGRAZ_REPO_DOMAIN = "https://invenio-test.tugraz.at"
-```
+- **Local config file (simple for desktop use)**  
+  - Copy `data/config.template.json` to `data/config.json`.
+  - Edit `data/config.json` and insert:
+    - your real API token in the `token` field, and
+    - the desired domain in the `domain` field (e.g. `https://invenio-test.tugraz.at` or `https://repository.tugraz.at`).
+  - `data/config.json` is ignored by git, so your credentials will not be committed.
 
 ## Usage (high level)
 
-- Place the required Excel files (e.g. `List_DOI.xlsx`) in the `data` folder.
+- Place the required Excel files (e.g. `Liste_DOI_template.xlsx`) in the `data` folder.
 - Run `repo_create_api.py` to generate JSON records and create drafts in the selected repository instance.
 - Run `repo_update_api.py` to enrich JSON records with DOIs and upload them.
 
@@ -56,8 +51,8 @@ $env:TUGRAZ_REPO_DOMAIN = "https://invenio-test.tugraz.at"
 For users who are not familiar with the code, the following points are the most important to check and, if necessary, change before running the scripts:
 
 - **Excel filenames and location**
-  - Ensure your input file for creating records is named like `List_DOI.xlsx` and placed in the `data` folder (same level as `src`).
-  - Ensure your file containing DOIs is named like `Liste_DOI_Fel_DOI.xlsx` and is also in the `data` folder.
+  - Ensure your input file for creating records is named like `Liste_DOI_template.xlsx` and placed in the `data` folder (same level as `src`).
+  - After running `repo_create_api.py`, a file `Liste_DOI_template_DOI.xlsx` will be written to the same `data` folder and can then be used by `repo_update_api.py`.
   - If your filenames differ, update the `data` variable and/or the explicit filename in:
     - `repo_create_api.py` (variable `data` near the top and the `pd.read_excel(...)` call in the `__main__` block).
     - `repo_update_api.py` (the `pd.read_excel(...)` call in the `__main__` block).
@@ -81,12 +76,11 @@ For users who are not familiar with the code, the following points are the most 
   - If you need different languages or access settings, adjust the values in the `create_json_record(...)` function in `repo_create_api.py` and in the added `024`/`856` fields in `repo_update_api.py`.
 
 - **Repository domain (test vs production)**
-  - To use the **test** repository: set `TUGRAZ_REPO_DOMAIN` to `https://invenio-test.tugraz.at`.
-  - To use the **production** repository: set `TUGRAZ_REPO_DOMAIN` to `https://repository.tugraz.at` or leave it unset (default).
+  - Set the desired domain in `data/config.json` (e.g. `https://invenio-test.tugraz.at` for testing, or `https://repository.tugraz.at` for production).
 
 - **API token**
   - Always keep your API token secret and **never** hardcode it into the scripts.
-  - Only set it via the environment variable `TUGRAZ_REPO_TOKEN` as described above.
+  - Only store it locally in `data/config.json` (which is git-ignored) or set it as an environment variable on the machine where you run the scripts; never commit it to the repository.
 
 If you are unsure about any of these settings, please contact the maintainers listed below before using the scripts in production.
 
