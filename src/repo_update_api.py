@@ -50,7 +50,11 @@ def put(url, data, headers):
 
 
 def update_json_record(directory, data_df):
+
+    valid_files = []
+
     for json_file in Path(directory).glob("Paper_*.json"):
+        
         # Extract index and title from the filename
         file_stem = json_file.stem  # Example: "Paper_1_Title"
         parts = file_stem.split("_", 2)  # Split to extract index and title
@@ -111,7 +115,70 @@ def update_json_record(directory, data_df):
             json.dump(ordered_data, fp, indent=4)
         print(f"Updated file: {json_file} with DOI: {doi}")
 
+        valid_files.append(json_file)
+        
+        return valid_files
 
+
+
+def update_selected_fields(json_file, updates):
+    """
+    Update specific MARC21 fields inside a JSON record.
+
+    Parameters
+    ----------
+    json_file : Path
+        Path to JSON file.
+
+    updates : dict
+        Dictionary containing MARC field updates.
+    """
+
+    # Load JSON
+    with json_file.open("r", encoding="utf8") as fp:
+        data = json.load(fp)
+
+    # Safety check
+    if "metadata" not in data:
+        print(f"No metadata found in: {json_file}")
+        return
+
+    fields = data["metadata"].get("fields", [])
+
+    # Loop through requested updates
+    for field_id, new_content in updates.items():
+
+        field_found = False
+
+        for field in fields:
+
+            if field.get("id") == field_id:
+
+                # Update existing field
+                field["ind1"] = new_content.get("ind1", field.get("ind1", ""))
+                field["ind2"] = new_content.get("ind2", field.get("ind2", ""))
+                field["subfield"] = new_content.get(
+                    "subfield",
+                    field.get("subfield", "")
+                )
+
+                field_found = True
+
+        # Append field if it does not exist
+        if not field_found:
+
+            fields.append({
+                "id": field_id,
+                "ind1": new_content.get("ind1", ""),
+                "ind2": new_content.get("ind2", ""),
+                "subfield": new_content.get("subfield", "")
+            })
+
+    # Save updated JSON
+    with json_file.open("w", encoding="utf8") as fp:
+        json.dump(data, fp, indent=4, ensure_ascii=False)
+
+    print(f"Updated MARC fields in: {json_file}")
 
 
 def draft(token, domain, data_model, input_json, input_metadata, directory):
@@ -159,7 +226,38 @@ if __name__ == "__main__":
     data_df = pd.read_excel(data_dir / f"{data}_DOI.xlsx")
 
     # Call the function, specifying the directory containing the JSON files
-    update_json_record(directory=data_dir, data_df=data_df)
-
-    for json_file in data_dir.glob("Paper_*.json"):
-        draft(TOKEN, DOMAIN, DATA_MODEL, input_json=str(json_file), input_metadata=None, directory="")
+    # Update only files with valid DOI
+    valid_files = update_json_record(
+        directory=data_dir,
+        data_df=data_df
+    )
+    
+    for json_file in valid_files:
+    
+        # Update selected MARC fields
+        update_selected_fields(
+            json_file,
+            updates={
+                "500": {
+                    "ind1": " ",
+                    "ind2": " ",
+                    "subfield": "$$a 8th International Young Geotechnical Engineers Conference - 8iYGEC"
+                },
+    
+                "970": {
+                    "ind1": "2",
+                    "ind2": "",
+                    "subfield": "$$b 2026 $$c Graz University of Technology $$d Conference Paper"
+                }
+            }
+        )
+    
+        # Upload updated record
+        draft(
+            TOKEN,
+            DOMAIN,
+            DATA_MODEL,
+            input_json=str(json_file),
+            input_metadata=None,
+            directory=""
+        )
