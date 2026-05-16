@@ -39,7 +39,6 @@ def upload_single_pdf(record_id: str, pdf_path: Path) -> None:
         print(f"PDF not found for record {record_id}: {pdf_path}")
         return
 
-    # For MARC21 publications we use the /api/publications endpoint (analogous to draft creation).
     base_url = f"{DOMAIN}/api/publications/{record_id}/draft/files"
     file_key = pdf_path.name
 
@@ -51,14 +50,13 @@ def upload_single_pdf(record_id: str, pdf_path: Path) -> None:
         data=json.dumps(files_payload),
     )
     if r.status_code not in (200, 201):
-        # If the file key already exists, we treat this as non-fatal and continue.
         try:
             err = r.json()
         except Exception:
             err = {}
         msg = err.get("message", "")
         if r.status_code == 400 and "already exists" in msg:
-            print(f"[{record_id}] File {file_key} is already registered; skipping registration.")
+            print(f"[{record_id}] File {file_key} is already registered; proceeding to upload content.")
         else:
             print(f"[{record_id}] Failed to register file: {r.status_code} {r.text}")
             return
@@ -75,26 +73,14 @@ def upload_single_pdf(record_id: str, pdf_path: Path) -> None:
         print(f"[{record_id}] Failed to upload content: {r.status_code} {r.text}")
         return
 
-    # 3) Commit the files to the draft
-    commit_url = f"{base_url}/commit"
+    # 3) Commit the individual file to the draft
+    commit_url = f"{base_url}/{file_key}/commit"
     r = requests.post(commit_url, headers=header(TOKEN))
-    # Some backends may not support an explicit commit endpoint for MARC21;
-    # in that case we ignore 405 and similar responses.
     if r.status_code not in (200, 201):
-        try:
-            err = r.json()
-        except Exception:
-            err = {}
-        msg = err.get("message", "")
-        if r.status_code == 405:
-            print(f"[{record_id}] Commit endpoint not allowed ({r.status_code}): {msg} – continuing.")
-        else:
-            print(f"[{record_id}] Failed to commit files: {r.status_code} {r.text}")
-            return
+        print(f"[{record_id}] Failed to commit file: {r.status_code} {r.text}")
+        return
 
-    print(f"[{record_id}] Successfully uploaded PDF: {file_key}")
-
-
+    print(f"[{record_id}] Successfully uploaded and committed PDF: {file_key}")
 if __name__ == "__main__":
     base_dir = Path(__file__).resolve().parent.parent
     data_dir = base_dir / "data"
