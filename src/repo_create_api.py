@@ -36,7 +36,7 @@ if not TOKEN:
 
 DOMAIN = config.get("domain") or os.getenv("TUGRAZ_REPO_DOMAIN", "https://repository.tugraz.at")
 DATA_MODEL = "marc21"
-data = "Liste_DOI_template"
+data = "Liste_DOI_template_book"
 
 
 def header(token):
@@ -63,7 +63,13 @@ def create_json_record(title, authors, publisher, publication_date, lang, long_c
     safe_title = re.sub(r'[<>:"/\\|?*]', '_', title)  # Replacing special characters with '_'
 
     # Erstelle das Subfield für den Hauptautor
-    subfield_value = f"$$a {authors[0]['family_name']}, {authors[0]['given_name']} $$u {authors[0]['affiliation']}"
+
+    subfield_value = (
+    f"$$a {authors[0]['family_name']}, "
+    f"{authors[0]['given_name']} "
+    f"$$u {authors[0]['affiliation']} "
+    f"$$4 aut"
+    )
     if not pd.isna(authors[0]['identifier']) and authors[0]['identifier']:
         subfield_value += f" $$2 {authors[0]['identifier']}"
 
@@ -90,7 +96,13 @@ def create_json_record(title, authors, publisher, publication_date, lang, long_c
                     "id": "041",
                     "ind1": "_",
                     "ind2": "_",
-                    "subfield": f"$$a {lang}"
+                    "subfield": f"$$a ger"
+                },
+                {
+                    "id": "044",
+                    "ind1": "",
+                    "ind2": "",
+                    "subfield": "$$c XA-AT"
                 },
                 {
                     "id": "100",
@@ -105,16 +117,26 @@ def create_json_record(title, authors, publisher, publication_date, lang, long_c
                     "subfield": f"$$a {title}"
                 },
                 {
+                    "id": "251",
+                    "ind1": "",
+                    "ind2": "",
+                    "subfield": "$$2 coar $$a am"
+                },
+                {
                     "id": "264",
                     "ind1": " ",
-                    "ind2": "",
-                    "subfield": f"$$b {conference_name}, {publisher} $$c {conference_year}"
+                    "ind2": "1",
+                    "subfield": (
+                        "$$b Technische Universität Graz, "
+                        "$$b {publisher}"
+                        f"$$c {conference_year}"
+                    )
                 },
                 {
                     "id": "300",
                     "ind1": "_",
                     "ind2": "_",
-                    "subfield": f"$$a {publisher} $$b {publication_date}"
+                    "subfield": "$$a 1 Online-Ressource $$b Illustrationen"
                 },
                 {
                     "id": "500",
@@ -129,19 +151,34 @@ def create_json_record(title, authors, publisher, publication_date, lang, long_c
                     "subfield": f"$$a {long_creative_common} $$f {short_creative_common} $$u {url_creative_common} $$2 cc"
                 },
                 {
+                    "id": "773",
+                    "ind1": "0",
+                    "ind2": "8",
+                    "subfield": (
+                        "$$i Enthalten in "
+                        f"$$t Beiträge zum {conference_name}"
+                    )
+                },
+                {
                     "id": "970",
                     "ind1": "2",
                     "ind2": "",
-                    "subfield": f"$$b {conference_year} $$c Technische Universität Graz $$d Konferenzbeitrag"
+                    "subfield": f"$$b {conference_year} $$c Graz University of Technology $$d Konferenzbeitrag"
                 },
             ],
-            "leader": "00000nam a2200000zca4500"
+            "leader": "00000naa a2200000zc#4500"
         },
     }
 
     # Add any additional authors if present
     for author in authors[1:]:
-        subfield_value = f"$$a {author['family_name']}, {author['given_name']} $$u {author['affiliation']}"
+
+        subfield_value = (
+                f"$$a {author['family_name']}, "
+                f"{author['given_name']} "
+                f"$$u {author['affiliation']} "
+                f"$$4 aut"
+            )
         if not pd.isna(author['identifier']) and author['identifier']:
             subfield_value += f" $$2 {author['identifier']}"
 
@@ -225,14 +262,14 @@ if __name__ == "__main__":
         json_record = create_json_record(
             title=title,
             authors=authors,
-            publisher="Technische Universität Graz, Institut für Bodenmechanik, Grundbau und Numerische Geotechnik",
-            publication_date="April 2026",
+            publisher="Graz University of Technology, Institute of Soil Mechanics, Foundation Engineering and Computational Geotechnics",
+            publication_date="June 2026",
             lang=lang,
             long_creative_common="Creative Commons namensnennung",
             short_creative_common="CC By 4.0 DEED Lizenz",
             url_creative_common="https://creativecommons.org/license/by/4.0",
             index=record_id,
-            conference_name="40. Christian Veder Kolloquium",
+            conference_name="8th International Young Geotechnical Engineers Conference - 8iYGEC",
             conference_year="2026"
         )
         safe_title = re.sub(r'[<>:"/\\|?*]', '_', title)  # Replacing special characters with '_'
